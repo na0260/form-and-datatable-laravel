@@ -28,16 +28,14 @@ class ProductController extends Controller
      * Get the products data.
      */
     public function getProductsData(){
-        $products = Product::select(['id', 'name', 'price', 'quantity']);
+        $products = Product::all();
 
         return DataTables::of($products)
-            ->addColumn('actions', function($row) {
-                return '
-                    <button class="btn btn-sm btn-primary editBtn" data-id="'.$row->id.'">Edit</button>
-                    <button class="btn btn-sm btn-danger deleteBtn" data-id="'.$row->id.'">Delete</button>
-                ';
+            ->addColumn('action', function($row) {
+                return '<button class="btn btn-sm btn-primary editBtn" data-id="' . $row->id . '">Edit</button>
+                    <button class="btn btn-sm btn-danger deleteBtn" data-id="' . $row->id . '">Delete</button>';
             })
-            ->rawColumns(['actions'])  // Allow HTML rendering in actions column
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -109,6 +107,11 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        //
+        try {
+            $product->delete();
+            return response()->json(['success' => 'Product deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
     }
 }

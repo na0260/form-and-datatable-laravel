@@ -41,13 +41,14 @@
                     processing: true,
                     serverSide: true,
                     ajax: "{{ route('products.data') }}",
-                    responsive: true,
                     columns: [
-                        { data: 'id', name: 'id' },
+                        { data: 'id', name: 'id', title: 'ID', render: function(data, type, row, meta) {
+                                return meta.row + 1; // Reset IDs dynamically based on row index
+                            }},
                         { data: 'name', name: 'name' },
                         { data: 'price', name: 'price' },
                         { data: 'quantity', name: 'quantity' },
-                        { data: 'actions', name: 'actions', orderable: false, searchable: false }
+                        { data: 'action', name: 'action', orderable: false, searchable: false }
                     ]
                 });
 
@@ -82,19 +83,7 @@
                         error: function(xhr) {
 
                             console.log(xhr.responseText);
-
-
-                            var message = 'An unexpected error occurred.';
-                            try {
-                                var response = JSON.parse(xhr.responseText);
-                                message = response.message || message;
-                            } catch (e) {
-                                console.log(e);
-                            }
-                            $('#alertMessage').removeClass('d-none').addClass('alert-danger').text(message);
-                            setTimeout(function() {
-                                $('#alertMessage').addClass('d-none');
-                            }, 5000);
+                            $('#alertMessage').removeClass('d-none').addClass('alert-danger').text('Failed to save product.');
                         }
                     });
                 });
@@ -139,10 +128,15 @@
                         success: function(response) {
                             $('#deleteModal').modal('hide');
                             table.ajax.reload();
-                            alert(response.success);
+                            $('#alertMessage').removeClass('d-none').addClass('alert-success').text(response.success);
+                            setTimeout(function() {
+                                $('#alertMessage').addClass('d-none'); // Hide alert after 5 seconds
+                            }, 5000);
+                            table.ajax.reload(null, false);
                         },
                         error: function(xhr) {
                             console.log(xhr.responseText);
+                            $('#alertMessage').removeClass('d-none').addClass('alert-danger').text('Failed to delete product.');
                         }
                     });
                 });
