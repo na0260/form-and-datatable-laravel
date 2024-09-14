@@ -46,7 +46,26 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'price' => 'required|numeric',
+                'quantity' => 'required|integer',
+            ]);
+
+            Product::updateOrCreate(
+                ['id' => $request->id],
+                [
+                    'name' => $request->name,
+                    'price' => $request->price,
+                    'quantity' => $request->quantity,
+                ]
+            );
+
+            return response()->json(['success' => 'Product added successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -62,7 +81,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        //
+        return response()->json($product);
     }
 
     /**
@@ -70,7 +89,19 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        //
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'price' => 'required|numeric',
+                'quantity' => 'required|integer',
+            ]);
+
+            $product->update($request->only(['name', 'price', 'quantity']));
+
+            return response()->json(['success' => 'Product updated successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

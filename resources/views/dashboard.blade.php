@@ -15,6 +15,11 @@
                             <button class="btn btn-primary" id="addNewBtn">Add New</button>
                         </div>
 
+                        <!-- Alert container -->
+                        <div id="alertContainer" class="container mt-3">
+                            <div id="alertMessage" class="alert d-none" role="alert"></div>
+                        </div>
+
                         <!-- Add/Edit Product Modal -->
                         <x-form-modal />
 
@@ -57,23 +62,43 @@
                 // Save Product (Add or Update)
                 $('#productForm').submit(function(e) {
                     e.preventDefault();
+
                     var formData = $(this).serialize();
                     var id = $('#productId').val();
 
                     $.ajax({
                         url: id ? "{{ url('products') }}/" + id : "{{ route('products.store') }}",
                         type: id ? "PUT" : "POST",
-                        data: formData,
+                        data: formData + '&_token=' + $('meta[name="csrf-token"]').attr('content'),
                         success: function(response) {
                             $('#productModal').modal('hide');
                             table.ajax.reload();
-                            alert(response.success);
+
+                            $('#alertMessage').removeClass('d-none').addClass('alert-success').text(response.success);
+                            setTimeout(function() {
+                                $('#alertMessage').addClass('d-none');
+                            }, 5000);
                         },
                         error: function(xhr) {
+
                             console.log(xhr.responseText);
+
+
+                            var message = 'An unexpected error occurred.';
+                            try {
+                                var response = JSON.parse(xhr.responseText);
+                                message = response.message || message;
+                            } catch (e) {
+                                console.log(e);
+                            }
+                            $('#alertMessage').removeClass('d-none').addClass('alert-danger').text(message);
+                            setTimeout(function() {
+                                $('#alertMessage').addClass('d-none');
+                            }, 5000);
                         }
                     });
                 });
+
 
                 // Edit Product
                 $('#productTable').on('click', '.editBtn', function() {
@@ -92,6 +117,7 @@
                         },
                         error: function(xhr) {
                             console.log(xhr.responseText);
+                            $('#alertMessage').removeClass('d-none').addClass('alert-danger').text('Failed to load product details.');
                         }
                     });
                 });
