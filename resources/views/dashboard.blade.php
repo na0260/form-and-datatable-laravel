@@ -36,14 +36,13 @@
     <x-slot name="script">
         <script type="text/javascript">
             $(document).ready(function() {
-                // Initialize the DataTable with responsive feature
                 var table = $('#productTable').DataTable({
                     processing: true,
                     serverSide: true,
                     ajax: "{{ route('products.data') }}",
                     columns: [
                         { data: 'id', name: 'id', title: 'ID', render: function(data, type, row, meta) {
-                                return meta.row + 1; // Reset IDs dynamically based on row index
+                                return meta.row + 1;
                             }},
                         { data: 'name', name: 'name' },
                         { data: 'price', name: 'price' },
@@ -130,7 +129,7 @@
                             table.ajax.reload();
                             $('#alertMessage').removeClass('d-none').addClass('alert-success').text(response.success);
                             setTimeout(function() {
-                                $('#alertMessage').addClass('d-none'); // Hide alert after 5 seconds
+                                $('#alertMessage').addClass('d-none');
                             }, 5000);
                             table.ajax.reload(null, false);
                         },
